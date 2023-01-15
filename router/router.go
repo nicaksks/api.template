@@ -2,6 +2,7 @@ package router
 
 import (
 	"api/handlers"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -10,7 +11,22 @@ import (
 
 func StartRouter() {
 	router := mux.NewRouter()
+	SetHeaders(router)
 
+	router.HandleFunc("/", handlers.Ready)
+	router.HandleFunc("/api/anime/{name}/{description}/{genre}", handlers.RegisterAnime).Methods("POST")
+	router.HandleFunc("/api/anime/{name}", handlers.DeleteAnime).Methods("DELETE")
+	router.HandleFunc("/api/{name}", handlers.FindAnime).Methods("POST")
+	router.HandleFunc("/api/update/{name}/{description}/{genre}", handlers.UpdateByTitle).Methods("POST")
+	router.HandleFunc("/api/list/all", handlers.FindAll).Methods("GET")
+	http.Handle("/", router)
+
+	fmt.Printf("Starting server localhost%v", os.Getenv("PORT"))
+	router.NotFoundHandler = router.NewRoute().BuildOnly().HandlerFunc(handlers.Err).GetHandler()
+	http.ListenAndServe(os.Getenv("PORT"), router)
+}
+
+func SetHeaders(router *mux.Router) {
 	router.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Add("Content-Type", "application/json")
@@ -21,15 +37,4 @@ func StartRouter() {
 			next.ServeHTTP(w, r)
 		})
 	})
-
-	router.HandleFunc("/", handlers.Ready)
-	router.HandleFunc("*", handlers.Err)
-	router.HandleFunc("/anime/{name}/{description}/{genre}", handlers.RegisterAnime).Methods("POST")
-	router.HandleFunc("/anime/{name}", handlers.DeleteAnime).Methods("DELETE")
-	router.HandleFunc("/{name}", handlers.FindAnime).Methods("POST")
-	router.HandleFunc("/update/{name}/{description}/{genre}", handlers.UpdateByTitle).Methods("POST")
-	router.HandleFunc("/list/all", handlers.FindAll).Methods("GET")
-	http.Handle("/", router)
-
-	http.ListenAndServe(os.Getenv("PORT"), router)
 }
