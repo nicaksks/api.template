@@ -21,7 +21,7 @@ func StartRouter() {
 	router.HandleFunc("/api/anime/{name}", handlers.DeleteAnime).Methods("DELETE")
 	http.Handle("/", router)
 
-	fmt.Printf("Starting server localhost%v", os.Getenv("PORT"))
+	fmt.Printf("Starting server localhost%v", Port())
 	router.NotFoundHandler = router.NewRoute().BuildOnly().HandlerFunc(handlers.Err).GetHandler()
-	http.ListenAndServe(os.Getenv("PORT"), router)
+	http.ListenAndServe(Port(), router)
 }
