@@ -4,7 +4,6 @@ import (
 	"api/handlers"
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/mux"
 )
